@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>hi 你好:)</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    font-family: "微软雅黑", sans-serif;
+    transition: background-color 2s ease;
+  }
+
+  .popup {
+    position: absolute;
+    width: 600px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    font-weight: bold;
+    color: #333;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    animation: fadeInOut 3s ease forwards;
+    text-align: center;
+    text-shadow: 0 3px 10px rgba(0,0,0,0.2);
+  }
+
+  .popup .author {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    font-size: 16px;
+    color: #666;
+  }
+
+  @keyframes fadeInOut {
+    0% { opacity: 0; transform: scale(0.8); }
+    10% { opacity: 1; transform: scale(1.05); }
+    90% { opacity: 1; transform: scale(1.0); }
+    100% { opacity: 0; transform: scale(0.8); }
+  }
+
+  #fullTip {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #FFEFD5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+    font-weight: bold;
+    color: #333;
+    z-index: 10000;
+    text-align: center;
+    text-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    flex-direction: column;
+  }
+
+  #musicControl {
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    width: 100px;
+    height: 100px;
+    background-color: #FFCC99;
+    border-radius: 50%;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    z-index: 10001;
+    font-size: 36px;
+  }
+
+  #musicControl span {
+    font-size: 36px;
+    font-weight: bold;
+    color: #333;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<!-- 启动全屏提示 -->
+<div id="fullTip"></div>
+
+<!-- 音乐浮窗 -->
+<div id="musicControl"><span>▶</span></div>
+<audio id="bgMusic" loop src="http://music.163.com/song/media/outer/url?id=2149612361.mp3"></audio>
+
+<script>
+const messages = [
+  "早安，开启美好一天！","温暖的阳光洒满房间。","愿你今天心情愉快。",
+  "生活充满希望。","微笑面对每一天。","努力就有收获。","幸福其实很简单。",
+  "相信自己，勇敢前行。","温柔以待世界。","感受生活的美好。","今天也要加油哦！",
+  "阳光总在风雨后。","遇见更好的自己。","心怀感恩，快乐常在。",
+  "愿你被世界温柔以待。","梦想照进现实。","每一天都是新的开始。",
+  "保持热爱，奔赴山海。","生活因你而美丽。","愿你笑容常在。",
+  "青春没有极限。","我们的故事没有终点。","最好的朋友在身边。",
+  "记得多喝水。","天冷了记得加衣。","饿了就吃饭。","不要熬夜。",
+  "小确幸也值得庆祝。","慢慢来，比较快。","今天的风很温柔。",
+  "所有努力都不会白费。","心之所向，素履以往。","好心情是自己给的。",
+  "世界很大，心要更大。","别害怕，勇敢一点。","生活会回馈每一份热爱。",
+  "保持微笑，保持热爱。","你已经很棒了！","星光不问赶路人。",
+  "山海有归期，风雨有相逢。","时间会给你答案。","一切都会好起来的。",
+  "平凡的日子也有光。","世界因你而可爱。","心怀浪漫，永远自由。",
+  "要相信自己配得上所有美好。","每个清晨都是新的希望。",
+  "愿你被温柔以待，也能温柔待人。","生活不止眼前的苟且，还有诗与远方。",
+  "心情不好就去睡觉吧。","醒来依然是崭新的一天。",
+  "你是独一无二的存在。","世界正在偷偷爱着你。",
+  "偶尔的停顿也是前进。","要善待自己。","慢慢来，没关系。",
+  "被爱包围的感觉真好。","一杯奶茶，一天好心情。",
+  "相信所有的巧合都是命中注定。",
+  "再平凡的生活也有闪光点。",
+  "做一个温柔且坚定的人。",
+  "每一次相遇都是缘分。",
+  "认真生活，也要善待自己。",
+  "不被情绪左右，做生活的主角。",
+  "生活不会辜负每一个笑对它的人。",
+  "善良是最温柔的力量。",
+  "被爱的人也要学会去爱。",
+  "每一个今天，都是余生中最年轻的一天。",
+  "努力是为了自己更自由地生活。",
+  "不要羡慕别人，做最好的自己。",
+  "世界的温柔都藏在日常里。",
+  "期待和惊喜都在路上。",
+  "保持热爱，奔赴山海与星辰。",
+  "你值得被世界温柔以待。",
+  "愿你被爱，永远自由。","把喜欢的一切留在身边。",
+  "风会带走不安。","再小的光也能照亮夜。",
+  "有梦就去追。","笑一笑，太阳就出来啦。",
+  "温暖一点，世界会更柔软。",
+  "心若向阳，何惧忧伤。",
+  "不急不躁，自有回响。"
+];
+
+const warmColors = [
+  "#FFEFD5","#FFE4B4","#FFDEAD","#FFB6C1","#FFCC99","#FFFACD","#FFF5EE","#FFE4E1",
+  "#FFDAB9","#FFA07A","#FFEC8B","#FFD7B4","#FFDFD3","#FFF0F5","#FFFAF0","#FFEFDD",
+  "#FFE4B5","#FFC0CB","#FFE4E1"
+];
+
+let count = 0;
+
+// 动态根据时间设置 fullTip 内容
+function setFullTipMessage() {
+  const now = new Date();
+  const hour = now.getHours();
+  const minute = now.getMinutes();
+  const fullTip = document.getElementById("fullTip");
+
+  let message = "";
+
+  if (hour >= 6 && (hour < 9 || (hour === 9 && minute <= 10))) {
+    message = "早上好 :)<br>--- 由此开启好心情❤️";
+  } else if (hour >= 9 && hour < 12) {
+    message = "上午好呀 :)<br>--- 元气满满每一天❤️";
+  } else if (hour >= 12 && hour < 14) {
+    message = "中午好呀 :)<br>--- 记得午休一下哦❤️";
+  } else if (hour >= 14 && hour < 18) {
+    message = "下午好 :)<br>--- 阳光正好加油呀❤️";
+  } else if (hour >= 18 && hour < 22) {
+    message = "晚上好 :)<br>--- 愿你被星光温柔以待❤️";
+  } else {
+    message = "夜深了 :)<br>--- 好梦伴你入眠❤️";
+  }
+
+  fullTip.innerHTML = message;
+}
+
+// 循环弹窗
+function showPopup() {
+  const popup = document.createElement('div');
+  popup.className = 'popup';
+  popup.textContent = messages[count % messages.length];
+
+  const author = document.createElement('div');
+  author.className = 'author';
+  author.textContent = 'by Yuboy';
+  popup.appendChild(author);
+
+  const bgColor = warmColors[count % warmColors.length];
+  popup.style.backgroundColor = bgColor;
+  document.body.style.backgroundColor = bgColor;
+
+  const x = Math.random() * (window.innerWidth - 600);
+  const y = Math.random() * (window.innerHeight - 200);
+  popup.style.left = `${x}px`;
+  popup.style.top = `${y}px`;
+
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 3000);
+
+  count++;
+  setTimeout(showPopup, 100);
+}
+
+// 音乐控制 & 启动逻辑
+const bgMusic = document.getElementById('bgMusic');
+const musicControl = document.getElementById('musicControl');
+const icon = musicControl.querySelector('span');
+let isPlaying = false;
+
+setFullTipMessage(); // 初始化全屏提示
+
+musicControl.addEventListener('click', () => {
+  if(!isPlaying){
+    bgMusic.play().catch(()=>{});
+    icon.textContent = '⏸';
+    isPlaying = true;
+
+    const fullTip = document.getElementById('fullTip');
+    fullTip.style.transition = 'opacity 1.5s ease';
+    fullTip.style.opacity = 0;
+    setTimeout(() => fullTip.remove(), 1500);
+
+    setTimeout(showPopup, 1500);
+  } else {
+    bgMusic.pause();
+    icon.textContent = '▶';
+    isPlaying = false;
+  }
+});
+
+// 可拖拽浮窗
+let offsetX = 0, offsetY = 0, isDragging = false;
+musicControl.addEventListener('mousedown', e => {
+  isDragging = true;
+  offsetX = e.clientX - musicControl.offsetLeft;
+  offsetY = e.clientY - musicControl.offsetTop;
+});
+document.addEventListener('mousemove', e => {
+  if(isDragging){
+    musicControl.style.left = (e.clientX - offsetX) + 'px';
+    musicControl.style.top = (e.clientY - offsetY) + 'px';
+  }
+});
+document.addEventListener('mouseup', () => {
+  isDragging = false;
+});
+</script>
+
+</body>
+</html>
